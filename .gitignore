@@ -1,0 +1,47 @@
+# Virtual environment
+.venv/
+venv/
+Lib/
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets / credentials
+.env
+kaggle.json
+
+# Raw / generated data
+data/raw/
+data/processed/
+
+# Trained models / checkpoints
+models/
+*.pt
+*.pth
+*.ckpt
+
+# Generated reports / predictions
+reports/preds/
+reports/*.csv
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+star_classification.csv
+
+# Local development / smoke tests
+.dev/
