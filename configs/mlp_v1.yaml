@@ -1,0 +1,37 @@
+seed: 42
+
+model:
+  input_dim: null
+  hidden_dims:
+    - 128
+    - 64
+  num_classes: 3
+  dropout: 0.2
+
+training:
+  epochs: 50
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  patience: 7
+
+optimizer:
+  name: adamw
+
+data:
+  train_path: data/processed/train.csv
+  val_path: data/processed/val.csv
+  test_path: data/processed/test.csv
+
+  target_column: class
+
+  # Fill these after Чел. 2 publishes the preprocessing result.
+  class_order: null
+
+  scaler_path: models/scaler.pkl
+
+output:
+  checkpoint_path: models/mlp_v1.pt
+  predictions_path: reports/preds/mlp_v1_test.npz
+  training_figure_path: reports/figures/fig_3_mlp_training_curves.png
+  improvements_table_path: reports/tables/improvements.csv
