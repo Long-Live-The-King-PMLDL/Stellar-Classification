@@ -26,10 +26,6 @@ models/*
 *.pth
 *.ckpt
 
-# Generated reports / predictions
-reports/preds/
-reports/*.csv
-
 # Logs
 *.log
 logs/
