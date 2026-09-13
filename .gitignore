@@ -19,12 +19,9 @@ Thumbs.db
 .env
 kaggle.json
 
-# Raw / generated data
-data/raw/
-data/processed/
-
 # Trained models / checkpoints
-models/
+models/*
+!models/scaler.pkl
 *.pt
 *.pth
 *.ckpt
@@ -40,8 +37,6 @@ logs/
 # Temporary files
 *.tmp
 *.temp
-
-star_classification.csv
 
 # Local development / smoke tests
 .dev/
