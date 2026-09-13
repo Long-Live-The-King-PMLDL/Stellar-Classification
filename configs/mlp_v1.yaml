@@ -2,9 +2,11 @@ seed: 42
 
 model:
   input_dim: null
+
   hidden_dims:
     - 128
     - 64
+
   num_classes: 3
   dropout: 0.2
 
@@ -23,12 +25,8 @@ data:
   val_path: data/processed/val.csv
   test_path: data/processed/test.csv
 
-  target_column: class
-
-  # Fill these after Чел. 2 publishes the preprocessing result.
+  target_column: label
   class_order: null
-
-  scaler_path: models/scaler.pkl
 
 output:
   checkpoint_path: models/mlp_v1.pt
