@@ -19,10 +19,6 @@ Thumbs.db
 .env
 kaggle.json
 
-# Raw / generated data
-data/raw/
-data/processed/
-
 # Trained models / checkpoints
 models/
 *.pt
