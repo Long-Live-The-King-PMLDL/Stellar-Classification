@@ -20,9 +20,9 @@ Thumbs.db
 kaggle.json
 
 # Trained models / checkpoints
-models/*
-!models/scaler.pkl
-*.pt
+#models/*
+#!models/scaler.pkl
+#*.pt
 *.pth
 *.ckpt
 
