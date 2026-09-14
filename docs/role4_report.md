@@ -1,12 +1,12 @@
-# ML Engineer (MLP v1) — Complete Role Report
+# Role 4 Report — ML Engineer (MLP v1)
 
-## 1. Role and Responsibility
+## 1. Role
 
-My role in the project is **ML Engineer — MLP v1 (Role 4)**.
+My role in the project was **ML Engineer — MLP v1 (Role 4)**.
 
-The responsibility of this role is to implement and train the first custom neural-network solution for the stellar classification task. The implementation must be reusable by the MLP v2 engineer through YAML configuration, use the shared project evaluation function, follow the common preprocessing pipeline, save the best model checkpoint, generate the MLP training curves, and provide the MLP v1 result for the final comparison.
+The main responsibilities were to implement the custom PyTorch MLP, make the training pipeline configurable through YAML, integrate the shared project utilities, train and validate MLP v1, save the best checkpoint, generate the training curve, run the final one-time test evaluation, and produce the required prediction and result artifacts.
 
-The main owned files and artifacts are:
+## 2. Main Files
 
 ```text
 configs/mlp_v1.yaml
@@ -14,39 +14,14 @@ src/models/mlp.py
 src/models/train.py
 models/mlp_v1.pt
 reports/figures/fig_3_mlp_training_curves.png
-reports/preds/mlp_v1_test.npz        # final test stage
-reports/tables/improvements.csv      # MLP v1 row after final test
-docs/sections/section_3_model.md
+reports/preds/mlp_v1_test.npz
+reports/tables/improvements.csv
+docs/role4_report.md
 ```
 
----
+## 3. Input Data
 
-## 2. Integration with Other Team Members
-
-The MLP v1 pipeline depends on outputs from three other roles:
-
-- **Role 2 — Data Engineer**
-  - `data/processed/train.csv`
-  - `data/processed/val.csv`
-  - `data/processed/test.csv`
-  - preprocessing and train-only scaling
-
-- **Role 3 — Baseline Engineer**
-  - `src/evaluation/metrics.py`
-  - shared `evaluate(y_true, y_proba)` function
-  - validation baseline results for sanity checking
-
-- **Role 6 — MLOps**
-  - `src/utils/seed.py`
-  - shared `seed_everything(42)` function
-
-The MLP implementation does not duplicate these responsibilities. It directly consumes the processed data and uses the shared metric and reproducibility utilities.
-
----
-
-## 3. Input Data Used by MLP v1
-
-The processed training data contains **8 numerical features**:
+The processed MLP input contains 8 numerical features:
 
 ```text
 alpha
@@ -59,37 +34,25 @@ z
 redshift
 ```
 
-The target column is:
+Target column:
 
 ```text
 label
 ```
 
-The target is already integer encoded using three classes:
-
-```text
-0
-1
-2
-```
-
-The processed splits used for training were:
+The target is encoded as three integer classes: `0`, `1`, and `2`.
 
 | Split | Samples |
 |---|---:|
 | Train | 79,999 |
 | Validation | 10,000 |
-| Test | Reserved for final one-time evaluation |
+| Test | 10,000 |
 
-The processed CSV files are already standardized by the shared preprocessing pipeline, so the MLP training code does not fit or apply another scaler. This avoids accidental double scaling and keeps preprocessing centralized in the Data Engineer's pipeline.
+The processed CSV files were already standardized by the shared preprocessing pipeline, so no additional scaling was performed inside the MLP training code.
 
----
+## 4. MLP Architecture
 
-## 4. MLP v1 Architecture
-
-The proposed model is implemented in PyTorch as `StellarMLP`.
-
-The architecture is:
+The model is implemented in PyTorch as `StellarMLP`.
 
 ```text
 Input: 8 features
@@ -110,10 +73,8 @@ Dropout(0.2)
 Linear(64 -> 3)
       |
       v
-3 class logits
+3 output logits
 ```
-
-Architecture table:
 
 | Layer | Configuration |
 |---|---|
@@ -128,343 +89,186 @@ Architecture table:
 | Regularization | Dropout(0.2) |
 | Output | Linear(64, 3) |
 
-The model returns **raw logits**. Softmax is not included in the network because training uses `CrossEntropyLoss`, which expects logits directly. Softmax is applied only during evaluation to produce class probabilities.
+The network returns raw logits. Softmax is applied only during evaluation, while training uses `CrossEntropyLoss`.
 
----
+## 5. Training Configuration
 
-## 5. Configuration Interface
+The model is controlled by `configs/mlp_v1.yaml`.
 
-The MLP v1 pipeline is fully controlled through:
+| Hyperparameter | Value |
+|---|---:|
+| Hidden dimensions | [128, 64] |
+| Dropout | 0.2 |
+| Optimizer | AdamW |
+| Learning rate | 0.001 |
+| Weight decay | 0.0001 |
+| Batch size | 256 |
+| Maximum epochs | 50 |
+| Early stopping patience | 7 |
+| Random seed | 42 |
 
-```text
-configs/mlp_v1.yaml
-```
+The YAML-driven design allows MLP v2 to reuse the same training implementation and modify only configuration values.
 
-The base configuration used for MLP v1 is:
+## 6. Training Procedure
 
-```yaml
-seed: 42
+The training pipeline:
 
-model:
-  input_dim: null
-  hidden_dims:
-    - 128
-    - 64
-  num_classes: 3
-  dropout: 0.2
+1. Loads the YAML configuration.
+2. Applies the shared seed utility.
+3. Loads the official train and validation splits.
+4. Builds `StellarMLP`.
+5. Trains with `CrossEntropyLoss`.
+6. Optimizes using AdamW.
+7. Evaluates each epoch using the shared `evaluate(y_true, y_proba)` function.
+8. Uses validation macro-F1 for checkpoint selection.
+9. Saves the best model checkpoint.
+10. Generates the MLP training curve.
+11. Keeps the test split untouched until final evaluation.
 
-training:
-  epochs: 50
-  batch_size: 256
-  learning_rate: 0.001
-  weight_decay: 0.0001
-  patience: 7
-
-optimizer:
-  name: adamw
-
-data:
-  train_path: data/processed/train.csv
-  val_path: data/processed/val.csv
-  test_path: data/processed/test.csv
-  target_column: label
-  class_order: null
-
-output:
-  checkpoint_path: models/mlp_v1.pt
-  predictions_path: reports/preds/mlp_v1_test.npz
-  training_figure_path: reports/figures/fig_3_mlp_training_curves.png
-  improvements_table_path: reports/tables/improvements.csv
-```
-
-The important design decision is that MLP v2 can reuse the same training implementation and change only YAML parameters such as:
-
-```text
-hidden_dims
-dropout
-learning_rate
-weight_decay
-batch_size
-optimizer
-```
-
-This satisfies the team requirement that the improved model should be built on top of the same training code rather than by modifying the MLP v1 implementation.
-
----
-
-## 6. Training Pipeline
-
-The complete training pipeline is implemented in:
-
-```text
-src/models/train.py
-```
-
-The pipeline performs the following steps:
-
-1. Load the YAML configuration.
-2. Set the shared random seed using `seed_everything(42)`.
-3. Load the official train and validation CSV files.
-4. Validate target and feature columns.
-5. Convert data to PyTorch tensors.
-6. Create deterministic `DataLoader` objects.
-7. Build `StellarMLP`.
-8. Train with `CrossEntropyLoss`.
-9. Optimize with AdamW.
-10. Evaluate on validation data after each epoch.
-11. Calculate metrics through the shared `evaluate()` function.
-12. Use **validation macro-F1** as the model-selection metric.
-13. Save a checkpoint whenever validation macro-F1 improves.
-14. Apply early stopping according to the configured patience.
-15. Save the MLP training curve figure.
-16. Keep the official test split untouched during model selection.
-
-The main training command is:
+Training command:
 
 ```powershell
 python -m src.models.train --config configs/mlp_v1.yaml --mode train
 ```
 
-The final test path is deliberately separated:
+## 7. Validation Results
 
-```powershell
-python -m src.models.train --config configs/mlp_v1.yaml --mode test
-```
-
-The second command must only be used after model selection and the MLP v2 stage are finished.
-
----
-
-## 7. Smoke Test Before Real Training
-
-Before using the official data, the complete pipeline was tested on a synthetic three-class dataset.
-
-The smoke test verified that the following components work together correctly:
+The best checkpoint was obtained at:
 
 ```text
-YAML configuration
--> DataLoader
--> StellarMLP
--> CrossEntropyLoss
--> AdamW
--> validation evaluation
--> macro-F1
--> early stopping
--> model checkpoint
--> training figure
+Best epoch: 49
+Best validation macro-F1: 0.9707
 ```
 
-The synthetic test completed successfully, confirming that the pipeline was technically functional before integration with the official project data.
-
----
-
-## 8. Real Training Results
-
-The MLP v1 model was trained on the official processed training split.
-
-Final training summary:
-
-| Item | Result |
-|---|---:|
-| Training samples | 79,999 |
-| Validation samples | 10,000 |
-| Input features | 8 |
-| Maximum epochs | 50 |
-| Best epoch | **49** |
-| Best validation macro-F1 | **0.9707** |
-| Optimizer | AdamW |
-| Learning rate | 0.001 |
-| Weight decay | 0.0001 |
-| Batch size | 256 |
-| Dropout | 0.2 |
-
-The validation macro-F1 improved throughout training from approximately **0.9440** after the first epoch to a best value of **0.9707** at epoch 49.
-
-The best checkpoint was saved to:
+Checkpoint:
 
 ```text
 models/mlp_v1.pt
 ```
 
-The training curve was saved to:
+Training figure:
 
 ```text
 reports/figures/fig_3_mlp_training_curves.png
 ```
 
-The final epoch itself was not automatically selected. The checkpoint corresponds to the epoch with the highest validation macro-F1, which protects the final model from later validation fluctuations.
-
----
-
-## 9. Baseline Sanity Check
-
-MLP v1 was compared against available validation results from the baseline implementation.
+## 8. Baseline Sanity Check
 
 | Model | Validation macro-F1 |
 |---|---:|
 | SVM (RBF) | 0.96074 |
 | **MLP v1** | **0.97070** |
-| Random Forest | **0.97486** |
+| Random Forest | 0.97486 |
 
-Differences relative to MLP v1:
+The MLP v1 outperformed SVM by `+0.00996` macro-F1 and was only `0.00416` below Random Forest.
+
+This confirmed that MLP v1 was competitive with the classical baselines and that the implementation was behaving correctly.
+
+## 9. Final Test Evaluation
+
+The official test split was evaluated once after model selection was completed.
+
+Command:
+
+```powershell
+python -m src.models.train --config configs/mlp_v1.yaml --mode test
+```
+
+Final results:
+
+| Metric | Value |
+|---|---:|
+| Test loss | 0.0979 |
+| **Macro-F1** | **0.9703** |
+| Accuracy | 0.9739 |
+| ROC-AUC OVR | 0.9947 |
+
+Per-class precision:
 
 ```text
-MLP v1 - SVM           = +0.00996
-MLP v1 - RandomForest  = -0.00416
+[0.97684565375838926,
+ 0.9635671560630777,
+ 0.9745570195365743]
 ```
 
-The MLP therefore performs clearly better than the SVM baseline and remains very close to Random Forest.
-
-This is a successful sanity check. MLP v1 is competitive with the classical baselines and does not show signs of an implementation or training failure.
-
-The result also supports an expected observation for this project: strong tree-based methods can be highly competitive on relatively low-dimensional tabular data, while the MLP still achieves similar performance.
-
----
-
-## 10. Training Curve
-
-The required training figure is:
+Per-class recall:
 
 ```text
-reports/figures/fig_3_mlp_training_curves.png
+[0.9793103448275862,
+ 0.9345991561181435,
+ 0.9935155164427976]
 ```
 
-It shows training and validation cross-entropy loss as a function of epoch.
-
-The training loss generally decreases over time, while validation loss also improves but contains some fluctuations in later epochs. Because checkpoint selection is based on validation macro-F1 rather than the final epoch, the best observed validation model is retained.
-
-Markdown reference for the report:
-
-```markdown
-![MLP v1 training curves](../../reports/figures/fig_3_mlp_training_curves.png)
-```
-
----
-
-## 11. Reproducibility
-
-The implementation follows the shared project reproducibility rules:
-
-- random seed: **42**
-- model parameters controlled through YAML
-- common processed dataset
-- common train/validation split
-- common project evaluation function
-- deterministic DataLoader generator
-- checkpoint selected only using validation data
-- official test split isolated from model development
-
-The input feature dimensionality is inferred from the processed training data instead of being permanently hardcoded. The code also checks that train, validation, and final test feature structure is consistent.
-
----
-
-## 12. Produced Artifacts
-
-### Source files
+Validation/test comparison:
 
 ```text
-configs/mlp_v1.yaml
-src/models/mlp.py
-src/models/train.py
+Validation macro-F1 = 0.9707
+Test macro-F1       = 0.9703
+Difference          = -0.0004
 ```
 
-### Generated artifacts already produced
+The validation and test results are very close, showing that the selected checkpoint generalized consistently to unseen data.
 
-```text
-models/mlp_v1.pt
-reports/figures/fig_3_mlp_training_curves.png
-```
+## 10. Prediction Artifact
 
-### Artifacts produced during the final test stage
+The required prediction file was generated:
 
 ```text
 reports/preds/mlp_v1_test.npz
+```
+
+Required arrays:
+
+```text
+y_true  -> (10000,)
+y_proba -> (10000, 3)
+```
+
+## 11. Improvements Table
+
+The MLP v1 result was written to:
+
+```text
 reports/tables/improvements.csv
 ```
 
-The prediction artifact uses the required format:
+Required values for the MLP v1 row:
 
 ```text
-y_true   -> shape (n,)
-y_proba  -> shape (n, 3)
+version = mlp_v1
+val_f1  = 0.9707
+test_f1 = 0.9703
+delta   = 0
 ```
 
-This allows Role 1 to construct the final confusion matrix and error analysis from a common prediction format.
+`delta = 0` because MLP v1 is the base model for comparison with MLP v2.
 
----
+## 12. Final Status
 
-## 13. Handoff to MLP v2
+- [x] Implemented `StellarMLP`
+- [x] Implemented YAML-driven training
+- [x] Integrated shared `evaluate()`
+- [x] Integrated shared `seed_everything()`
+- [x] Integrated the official processed dataset
+- [x] Completed the synthetic smoke test
+- [x] Trained MLP v1 on the official training split
+- [x] Selected the best checkpoint with validation macro-F1
+- [x] Achieved validation macro-F1 = **0.9707**
+- [x] Saved `models/mlp_v1.pt`
+- [x] Generated `fig_3_mlp_training_curves.png`
+- [x] Compared against validation baselines
+- [x] Performed the final one-time test evaluation
+- [x] Achieved test macro-F1 = **0.9703**
+- [x] Generated `reports/preds/mlp_v1_test.npz`
+- [x] Updated `reports/tables/improvements.csv`
+- [x] Completed the Role 4 report
 
-The MLP v1 result provides the reference point for Role 5.
+## 13. Conclusion
 
-Reference configuration:
+The MLP v1 implementation was completed successfully.
 
-```text
-hidden_dims = [128, 64]
-dropout = 0.2
-learning_rate = 0.001
-weight_decay = 0.0001
-batch_size = 256
-optimizer = AdamW
-```
+The model achieved a validation macro-F1 of **0.9707** and a final test macro-F1 of **0.9703**, with test accuracy of **0.9739** and ROC-AUC OVR of **0.9947**.
 
-Reference result:
+The small difference between validation and test macro-F1 indicates stable generalization. The MLP outperformed the SVM baseline and remained close to Random Forest. The implementation is configuration-driven and reusable by the MLP v2 role.
 
-```text
-validation macro-F1 = 0.9707
-```
 
-MLP v2 should attempt to improve this score using configuration changes while reusing the same training implementation.
-
-Possible tunable parameters include:
-
-```text
-hidden_dims
-dropout
-learning_rate
-weight_decay
-batch_size
-optimizer
-```
-
-The official test set must not be used to choose among these configurations.
-
----
-
-## 14. Current Status
-
-Completed:
-
-- [x] PyTorch MLP architecture
-- [x] YAML-driven model configuration
-- [x] YAML-driven training configuration
-- [x] shared metric integration
-- [x] shared seed integration
-- [x] official processed-data integration
-- [x] synthetic end-to-end smoke test
-- [x] real train/validation training
-- [x] validation macro-F1 model selection
-- [x] best checkpoint generation
-- [x] training-curve generation
-- [x] baseline sanity comparison
-- [x] handoff result for MLP v2
-
-Pending:
-
-- [ ] wait for MLP v2 tuning/model-selection stage to finish
-- [ ] run MLP v1 on the official test split once
-- [ ] save `reports/preds/mlp_v1_test.npz`
-- [ ] add MLP v1 row to `reports/tables/improvements.csv`
-- [ ] insert final test macro-F1 into the report
-
----
-
-## 15. Conclusion
-
-The MLP v1 pipeline was successfully implemented and integrated with the shared project structure.
-
-The final MLP v1 architecture uses two hidden layers with batch normalization, ReLU activation, and dropout. The model achieved a **validation macro-F1 of 0.9707**, outperforming the SVM baseline (`0.96074`) and remaining close to the Random Forest baseline (`0.97486`).
-
-The training pipeline is reproducible, configuration-driven, compatible with the shared preprocessing and evaluation modules, and reusable by the MLP v2 engineer.
-
-The only remaining MLP v1 evaluation step is the final one-time test evaluation, which is intentionally postponed until the model-selection and MLP v2 stages are complete.

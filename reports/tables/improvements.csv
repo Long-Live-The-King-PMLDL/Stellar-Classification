@@ -1,0 +1,2 @@
+version,change,val_f1,test_f1,delta
+mlp_v1,Base MLP architecture,0.9706810080854936,0.9702945025756154,0.0
