@@ -1,0 +1,27 @@
+seed: 42
+model:
+  input_dim: null
+  hidden_dims:
+  - 128
+  - 64
+  num_classes: 3
+  dropout: 0.05
+training:
+  epochs: 70
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 1.0e-05
+  patience: 10
+optimizer:
+  name: adamw
+data:
+  train_path: data/processed/train.csv
+  val_path: data/processed/val.csv
+  test_path: data/processed/test.csv
+  target_column: label
+  class_order: null
+output:
+  checkpoint_path: models/mlp_v2.pt
+  predictions_path: reports/preds/mlp_v2_test.npz
+  training_figure_path: .dev/mlp_v2_final/training_curves.png
+  improvements_table_path: reports/tables/improvements.csv
