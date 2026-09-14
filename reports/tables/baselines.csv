@@ -1,0 +1,5 @@
+model,source,val_f1,test_f1,accuracy,roc_auc,train_time_s,notes
+xgboost_fe,"Kaggle: @emanuellcs",0.97647,0.97467,0.97780,0.99675,50.7,early_stopping_iter=1379
+svm_rbf,"Kaggle: @beyzanks",0.96074,0.95650,0.96130,0.99040,18.5,trained_on_20k_subsample
+random_forest,"Kaggle: @beyzanks",0.97486,0.97569,0.97890,0.99593,2.3,default_params
+keras_nn,"Kaggle: @prtkpiyush",0.96805,0.96988,0.97320,0.99515,80.6,200_epochs_no_ES
