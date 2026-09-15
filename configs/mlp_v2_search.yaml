@@ -1,0 +1,70 @@
+base_config: configs/mlp_v1.yaml
+baseline_val_f1: 0.9706810080854936
+
+work_dir: .dev/mlp_v2_tuning
+results_path: reports/tables/mlp_v2_tuning.csv
+selected_config_path: configs/mlp_v2.yaml
+
+final_output:
+  checkpoint_path: models/mlp_v2.pt
+  predictions_path: reports/preds/mlp_v2_test.npz
+  training_figure_path: .dev/mlp_v2_final/training_curves.png
+  improvements_table_path: reports/tables/improvements.csv
+
+# A compact 2x2 search around MLP v1. All decisions use validation macro-F1.
+trials:
+  - name: base_extended
+    overrides:
+      model:
+        hidden_dims: [128, 64]
+        dropout: 0.2
+      training:
+        epochs: 70
+        patience: 10
+
+  - name: lower_dropout
+    overrides:
+      model:
+        hidden_dims: [128, 64]
+        dropout: 0.1
+      training:
+        epochs: 70
+        patience: 10
+
+  - name: wider
+    overrides:
+      model:
+        hidden_dims: [256, 128]
+        dropout: 0.2
+      training:
+        epochs: 70
+        patience: 10
+
+  - name: wider_lower_dropout
+    overrides:
+      model:
+        hidden_dims: [256, 128]
+        dropout: 0.1
+      training:
+        epochs: 70
+        patience: 10
+
+  - name: lower_learning_rate
+    overrides:
+      model:
+        hidden_dims: [128, 64]
+        dropout: 0.1
+      training:
+        epochs: 90
+        patience: 15
+        learning_rate: 0.0005
+
+  - name: lighter_regularization
+    overrides:
+      model:
+        hidden_dims: [128, 64]
+        dropout: 0.05
+      training:
+        epochs: 70
+        patience: 10
+        weight_decay: 0.00001
