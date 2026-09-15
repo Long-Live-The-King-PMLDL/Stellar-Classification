@@ -50,6 +50,22 @@ This is still a valid model modification experiment: the search protocol was
 fixed, all decisions used validation macro-F1, and the negative result is
 reported rather than selecting a model using the test set.
 
+## Final test results
+
+After model selection was frozen, MLP v2 was evaluated on the official test
+split exactly once using the shared `evaluate()` function.
+
+| Version | Validation macro-F1 | Test macro-F1 | Test delta vs v1 |
+|---|---:|---:|---:|
+| MLP v1 | 0.970681 | **0.970295** | 0.000000 |
+| MLP v2 | 0.970580 | 0.969771 | -0.000523 |
+
+MLP v2 achieved test accuracy 0.9734 and macro ROC-AUC OVR 0.9947. The test
+result confirms the validation conclusion: lighter regularization did not
+produce a meaningful improvement over MLP v1. The small negative delta is
+consistent with a task that is already close to saturation for this MLP and
+feature representation.
+
 ## Reproduction
 
 ```powershell
@@ -59,13 +75,13 @@ $env:MPLBACKEND = "Agg"
 python -m src.models.train --config configs/mlp_v2.yaml --mode train
 ```
 
-After the team authorizes final testing and the MLP v1 row exists in
-`reports/tables/improvements.csv`, run exactly once:
+The following command was used exactly once after final testing was authorized
+and the completed MLP v1 result became available:
 
 ```powershell
 python -m src.models.finalize_v2 --config configs/mlp_v2.yaml
 ```
 
-The final test macro-F1 and v1-to-v2 test delta must then be inserted into the
-project's final report. They are intentionally absent at the model-selection
-stage.
+It produced `reports/preds/mlp_v2_test.npz` and added the `mlp_v2` row to
+`reports/tables/improvements.csv`. The finalizer refuses to run again while the
+prediction artifact exists, protecting the one-time test protocol.
