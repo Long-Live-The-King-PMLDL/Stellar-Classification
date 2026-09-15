@@ -70,7 +70,7 @@ The best checkpoint was obtained at **epoch 49**, with a validation macro-F1 of 
 
 The training and validation loss curves are shown in Figure 3.
 
-![MLP v1 training curves](../../reports/figures/fig_3_mlp_training_curves.png)
+![MLP v1 training curves](/reports/figures/fig_3_mlp_training_curves.png)
 
 The training loss decreased from approximately 0.355 at the first epoch to approximately 0.104 by the end of training. Validation loss also decreased overall, with some fluctuations in later epochs. Checkpoint selection based on validation macro-F1 ensured that the best-performing model was retained rather than simply using the final epoch.
 
