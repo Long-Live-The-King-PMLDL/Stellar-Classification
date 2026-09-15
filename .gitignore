@@ -5,7 +5,7 @@ Lib/
 # Python cache
 __pycache__/
 *.py[cod]
-
+__pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
@@ -19,19 +19,12 @@ Thumbs.db
 .env
 kaggle.json
 
-# Raw / generated data
-data/raw/
-data/processed/
-
 # Trained models / checkpoints
-models/
+models/*
+!models/scaler.pkl
 *.pt
 *.pth
 *.ckpt
-
-# Generated reports / predictions
-reports/preds/
-reports/*.csv
 
 # Logs
 *.log
@@ -40,8 +33,6 @@ logs/
 # Temporary files
 *.tmp
 *.temp
-
-star_classification.csv
 
 # Local development / smoke tests
 .dev/
