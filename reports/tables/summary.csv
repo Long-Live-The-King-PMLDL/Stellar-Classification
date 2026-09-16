@@ -1,0 +1,7 @@
+model,kind,val_f1,test_f1,accuracy,train_time_s,notes
+random_forest,baseline,0.97486,0.97569,0.9789,2.3,Kaggle: @beyzanks
+xgboost_fe,baseline,0.97647,0.97467,0.9778,50.7,Kaggle: @emanuellcs
+MLP_mlp_v1,own model,0.9706810080854936,0.9702945025756154,,,Base MLP architecture (delta test_f1 = 0.0)
+keras_nn,baseline,0.96805,0.96988,0.9732,80.6,Kaggle: @prtkpiyush
+MLP_mlp_v2,own model,0.9705796283052198,0.9697710699294004,,,dropout 0.20->0.05; weight_decay 1e-4->1e-5 (delta test_f1 = -0.0005234326462149)
+svm_rbf,baseline,0.96074,0.9565,0.9613,18.5,Kaggle: @beyzanks
