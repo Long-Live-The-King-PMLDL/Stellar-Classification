@@ -50,6 +50,22 @@ This is still a valid model modification experiment: the search protocol was
 fixed, all decisions used validation macro-F1, and the negative result is
 reported rather than selecting a model using the test set.
 
+## Final test results
+
+After model selection was frozen, MLP v2 was evaluated on the official test
+split exactly once using the shared `evaluate()` function.
+
+| Version | Validation macro-F1 | Test macro-F1 | Test delta vs v1 |
+|---|---:|---:|---:|
+| MLP v1 | 0.970681 | **0.970295** | 0.000000 |
+| MLP v2 | 0.970580 | 0.969771 | -0.000523 |
+
+MLP v2 achieved test accuracy 0.9734 and macro ROC-AUC OVR 0.9947. The test
+result confirms the validation conclusion: lighter regularization did not
+produce a meaningful improvement over MLP v1. The small negative delta is
+consistent with a task that is already close to saturation for this MLP and
+feature representation.
+
 ## Reproduction
 
 ```powershell
